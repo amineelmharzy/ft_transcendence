@@ -1,0 +1,128 @@
+version: '3.9'
+
+networks:
+  transcendence:
+    name: transcendence
+    driver: bridge
+  monitoring:
+    name: monitoring
+    driver: bridge
+
+services:
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_DB: transcendence
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: pfister
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    shm_size: 128mb
+    networks:
+      - transcendence
+    restart: unless-stopped
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+    networks:
+      - transcendence
+    restart: unless-stopped
+  backend:
+    build:
+      context: ./backend
+    image: backend:latest
+    container_name: backend
+    depends_on:
+      - db
+    networks:
+      - transcendence
+      - monitoring
+    restart: unless-stopped
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    command: "--nginx.scrape-uri=http://nginx:80/stub_status"
+    depends_on:
+      - nginx
+    networks:
+      - transcendence
+      - monitoring
+    restart: unless-stopped
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    networks:
+      - monitoring
+    restart: unless-stopped
+  postgres_exporter:
+    image: wrouesnel/postgres_exporter
+    container_name: postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://pfister:password@db:5432/transcendence?sslmode=disable
+    depends_on:
+      - db
+    networks:
+      - transcendence
+      - monitoring
+    restart: unless-stopped
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=1GB"
+      #command: "--config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --storage.tsdb.retention.time=30d"
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert.rules:/etc/prometheus/alert.rules
+    depends_on:
+      - backend
+      - nginx-exporter
+      - postgres_exporter
+      - alertmanager
+    networks:
+      - monitoring
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/config/ssl:/etc/grafana/ssl:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+volumes:
+  postgres_data: {}
+  prometheus_data: {}
+  grafana_data: {}
