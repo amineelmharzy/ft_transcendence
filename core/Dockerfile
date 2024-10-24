@@ -7,7 +7,7 @@ WORKDIR	/app
 
 RUN	apt update -y && apt upgrade -y
 COPY	requirements.txt .
-COPY	transcendence core
+COPY	core core
 COPY	runserver.sh .
 RUN	pip install --no-cache-dir -r requirements.txt
 RUN	chmod +x runserver.sh

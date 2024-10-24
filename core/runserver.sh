@@ -1,8 +1,7 @@
 #!/bin/bash
 
 sleep 3
-cd core/
 
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver '0.0.0.0:8000'
+python core/manage.py makemigrations
+python core/manage.py migrate
+python core/manage.py runserver '0.0.0.0:8000'
