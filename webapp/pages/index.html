@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Ping Pong Game</title>
+ <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+ <link href="../main.css" rel="stylesheet">
+ <style>
+.game-area {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+.game-board {
+    width: 800px;
+    height: 400px;
+    background-color: #e9ecef;
+    border: 2px solid #343a40;
+    border-radius: 10px;
+    position: relative;
+    margin-top: 20px;
+}
+.paddle {
+    position: absolute;
+    width: 10px;
+    height: 100px;
+    background-color: #343a40;
+    border-radius: 5px;
+}
+.paddle-left {
+    left: 0;
+    top: calc(50% - 50px);
+}
+.paddle-right {
+    right: 0;
+    top: calc(50% - 50px);
+}
+.ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #dc3545;
+    border-radius: 50%;
+    top: calc(50% - 10px);
+    left: calc(50% - 10px);
+}
+</style>
+</head>
+<body>
+ <div class="game-area">
+    <div class="game-board">
+        <div class="paddle paddle-left"></div>
+        <div class="ball"></div>
+        <div class="paddle paddle-right"></div>
+    </div>
+ </div>
+</body>
+</html>
