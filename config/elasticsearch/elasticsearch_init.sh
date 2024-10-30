@@ -44,11 +44,11 @@ find . -type d -exec chmod 750 \{\} \;;
 find . -type f -exec chmod 640 \{\} \;;
 echo "Waiting for Elasticsearch availability";
 until curl -s --cacert config/certs/ca/ca.crt https://elasticsearch:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
-echo "Setting kibana_system password";
-until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+echo "Setting kibana user password";
+until curl -s -X POST --cacert config/certs/ca/ca.crt -u "${ELASTIC_USER}:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/${KIBANA_USER}/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
 
 # Apply ILM policy
-curl --cacert config/certs/ca/ca.crt -k -u elastic:${ELASTIC_PASSWORD} -X PUT "https://elasticsearch:9200/_ilm/policy/logs_lifecycle_policy" -H 'Content-Type: application/json' -d'{
+curl --cacert config/certs/ca/ca.crt -k -u ${ELASTIC_USER}:${ELASTIC_PASSWORD} -X PUT "https://elasticsearch:9200/_ilm/policy/logs_lifecycle_policy" -H 'Content-Type: application/json' -d'{
     "policy": {
         "phases": {
             "hot": {
@@ -70,7 +70,7 @@ curl --cacert config/certs/ca/ca.crt -k -u elastic:${ELASTIC_PASSWORD} -X PUT "h
 }'
 
 # Apply index template
-curl --cacert config/certs/ca/ca.crt -k -u elastic:${ELASTIC_PASSWORD} -X PUT "https://elasticsearch:9200/_index_template/logs_template" -H 'Content-Type: application/json' -d'{
+curl --cacert config/certs/ca/ca.crt -k -u ${ELASTIC_USER}:${ELASTIC_PASSWORD} -X PUT "https://elasticsearch:9200/_index_template/logs_template" -H 'Content-Type: application/json' -d'{
   "index_patterns": ["nginx-logs-*", "django-logs-*", "postgres-logs-*"],
     "template": {
         "settings": {
