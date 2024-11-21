@@ -14,6 +14,7 @@ import Header from '../component/main/Header.js';
 import appState from '../state/appState.js';
 import layoutState from '../state/layoutState.js';
 import { toggleNavigationComponents } from '../misc/toggleUtils.js';
+import Settings from '../pages/Settings.js';
 
 const pushState = window.history.pushState
 const pushStateEvent = new Event('pushstate')
@@ -36,8 +37,9 @@ const routes = [
     { route: '/chat', handler: authMiddleware(Chat) },
     { route: '/login', handler: authRedirectMiddleware(Login) },
     { route: '/logout', handler: Logout },
-    { route: '/register', handler: authRedirectMiddleware(Register) },
     { route: '/profile', handler: Profile },
+    { route: '/register', handler: authRedirectMiddleware(Register) },
+    { route: '/settings', handler: Settings },
     { route: '/enable2fa', handler: Enable2FA },
     { route: '/confirm2fa', handler: Confirm2FA },
 ];

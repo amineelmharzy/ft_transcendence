@@ -1,3 +1,6 @@
+import { redirect } from "../../router/router.js"
+import appState from "../../state/appState.js"
+
 class Header extends HTMLElement {
     constructor() {
         super()
@@ -48,12 +51,12 @@ class Header extends HTMLElement {
                                 <img src="../assets/profile.jpg" alt="User" width="40" height="40" class="rounded-circle">
                             </a>
                             <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                                <li><a class="dropdown-item" href="/profile">Profile</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item" href="#">Logout</a></li>
+                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
                             </ul>
                         </div>
                     </div>
@@ -61,6 +64,13 @@ class Header extends HTMLElement {
             </div>
             <div class="header-separator"></div>
         `
+
+        this.headerElement.querySelectorAll('.dropdown-item').forEach((link) => {
+            link.onclick = (e) => {
+                e.preventDefault()
+                redirect(link.pathname)
+            }
+        })
     }
 }
 

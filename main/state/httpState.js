@@ -5,7 +5,7 @@ class HttpState {
         this.response = null
     }
 
-    update(status, statusCode, response) {
+    async update(status, statusCode, response) {
         this.status = status
         this.statusCode = statusCode
         this.response = response

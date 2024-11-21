@@ -4,9 +4,9 @@ import { login } from "../services/authService.js"
 import { redirect } from "../router/router.js"
 
 import httpState from "../state/httpState.js"
-// import appState from "../state/appState.js"
 
 import Oauth from "./Oauth.js"
+import appState from "../state/appState.js"
 
 
 function handleLoginFailed(form) {
@@ -67,7 +67,10 @@ function Login() {
         e.preventDefault()
         const credentials = parseFromFields(form)
         login(credentials).then(() => {
-            redirect('enable2fa')
+            if (appState.user.otp_status) {
+                redirect('confirm2fa')
+            }
+            redirect('/')
         }).catch(error => {
             handleLoginFailed(form)
         })

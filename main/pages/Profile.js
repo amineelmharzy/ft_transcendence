@@ -4,13 +4,21 @@ function Profile() {
         <div class="main-content">
             <div class="profile">
                 <!-- Profile Background Image -->
-                <img src="../assets/background.avif" alt="" class="profile-cover">
+                <div>
+                    <label class="background-container">
+                        <img src="../assets/images/background.avif" alt="" class="profile-cover">
+                        <input type="file" id="backgroundPicture" class="d-none" accept="image/*">
+                    </label>
+                </div>
 
                 <!-- Profile Avatar and Status -->
                 <div class="profile-wrapper">
                     <div class="profile-avatar">
-                        <img src="../assets/images/profile.jpg" alt="" class="profile-img">
-                        <div class="online-status position-absolute"></div>
+                        <label class="profile-picture-wrapper">
+                            <img src="../assets/images/profile.jpg" alt="" class="profile-img">
+                            <input type="file" id="profilePicture" class="d-none" accept="image/*">
+                            <div class="online-status position-absolute"></div>
+                        </label>
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between">
@@ -202,6 +210,34 @@ function Profile() {
                     beginAtZero: true
                 }
             }
+        }
+    });
+
+    const backgroundImage = container.querySelector('.profile-cover');
+    const backgroundPictureInput = container.querySelector('#backgroundPicture');
+
+    backgroundPictureInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                backgroundImage.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    const profileImage = container.querySelector('.profile-img');
+    const profilePictureInput = container.querySelector('#profilePicture');
+
+    profilePictureInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                profileImage.src = reader.result;
+            };
+            reader.readAsDataURL(file);
         }
     });
     return container

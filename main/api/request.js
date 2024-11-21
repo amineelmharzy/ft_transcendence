@@ -7,7 +7,6 @@ import httpState from '../state/httpState.js';
 async function request({ uri, method = "POST", headers = {}, body }, auth_required = false, exclude = []) {
     const defaults = { "Content-Type": "application/json" }
 
-
     if (auth_required) {
         defaults["Authorization"] = `Bearer ${appState.token}`
     }

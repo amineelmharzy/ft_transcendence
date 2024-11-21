@@ -9,7 +9,7 @@ import { getUser } from './userService.js';
 async function login(credentials) {
     await request({ uri: 'login', body: credentials }, false, [HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED])
         .then(async () => {
-            await appState.update(await getUser(), httpState.response.access_token, true)
+            await appState.update(null, httpState.response.access_token, true)
         }).catch(error => {
             throw new Error(error)
         })
