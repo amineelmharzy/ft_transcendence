@@ -1,0 +1,14 @@
+route:
+  receiver: 'email'
+  repeat_interval: 4h
+  group_by: [ alertname ]
+
+
+receivers:
+  - name: 'email'
+    email_configs:
+      - smarthost: 'smtp.gmail.com:587' # For Gmail TLS
+        auth_username: 'Enter Google Email' # For Send
+        auth_password: "App Secret Key"
+        from: 'whatever@mail.com'
+        to: 'Enter Your Email' # For Receive
