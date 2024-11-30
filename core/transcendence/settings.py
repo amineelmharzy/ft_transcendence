@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from logging.handlers import SysLogHandler
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -169,7 +170,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Channel layers
+
 CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
+# Logging
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'syslog': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.SysLogHandler',
+#             'address': ('logstash', 5045),
+#             'facility': SysLogHandler.LOG_LOCAL0,
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['syslog'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

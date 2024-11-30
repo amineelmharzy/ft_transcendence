@@ -1,0 +1,6 @@
+# Ignore environment
+.env
+config/secrets/backend.env
+config/secrets/database.env
+config/grafana/config/grafana.ini
+config/alertmanager/alertmanager.yml
