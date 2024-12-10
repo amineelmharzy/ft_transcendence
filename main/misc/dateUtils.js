@@ -1,3 +1,11 @@
+function formatYearDate(dateInput) {
+    const date = new Date(dateInput);
+    const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+}
+
 function isToday(timestamp) {
     const today = new Date()
     const date = new Date(timestamp)
@@ -31,4 +39,4 @@ function normalizeDate(timestamp) {
     }
 }
 
-export { isToday, normalizeDate }
+export { isToday, normalizeDate, formatYearDate }

@@ -1,6 +1,7 @@
 class LayoutState {
     constructor() {
         this.commonLayout = false
+        this.darkMode = true
     }
 }
 

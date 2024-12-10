@@ -4,6 +4,7 @@ from .serializers import GameSerializer
 
 import time
 import json
+import asyncio
 import random
 import hashlib
 from .models import Game, Player
@@ -14,6 +15,7 @@ from users.models import User
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.winningScore = 3
         self.room_group_name = None
         self.game = None
         self.user = self.scope["user"]
@@ -22,12 +24,11 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.player = await self.init_player()
             self.opponent = await self.select_opponent()
             while not self.opponent:
-                time.sleep(1)
+                asyncio.sleep(1)
                 self.opponent = await self.select_opponent()
             self.room_group_name = await self.generate_room_name()
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
             self.game = await self.init_game()
-            # await self.sync_game_data(await self.serialize_game(self.game))
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -46,13 +47,14 @@ class GameConsumer(AsyncWebsocketConsumer):
         json_data = json.loads(text_data)
         data = {}
         event = json_data.get("event")  # move, bounce, pass
+        player = json_data.get("player")
         if event == "move":
             data["paddleY"] = json_data.get("y")
         elif event == "bounce":
             data["angle"] = json_data.get("angle")
         elif event == "point":
-            pass
-        # await self.sync_game_data(json_data)
+            await self.update_game_score(player)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {"type": "sync_game_data", "data": json_data},
@@ -100,6 +102,20 @@ class GameConsumer(AsyncWebsocketConsumer):
     def serialize_game(self, game):
         serialized = GameSerializer(game, context={"player": self.player})
         return serialized.data
+
+    @database_sync_to_async
+    def update_game_score(self, player):
+        if player == self.game.player.user.id:
+            self.game.player_score += 1
+        else:
+            self.game.opponent_score += 1
+
+        if (
+            self.game.player_score == self.winningScore
+            or self.game.opponent_score == self.winningScore
+        ):
+            self.game.is_over = True
+        self.game.save()
 
     async def sync_game_data(self, event):
         data = event["data"]

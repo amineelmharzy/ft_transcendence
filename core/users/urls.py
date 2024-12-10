@@ -17,7 +17,8 @@ urlpatterns = [
     path("otp/enable/", views.enable_otp, name="enable_otp"),
     path("otp/disable/", views.disable_otp, name="disable_otp"),
     path("otp/verify/", views.validate_otp, name="validate_otp"),
-    path("user/", views.get_user_data, name="user-profile"),
+    path("user/", views.get_user_data, name="user-account"),
     path("user/update/", views.update_user, name="user-update"),
     path("user/delete/", views.delete, name="user-delete"),
+    path("user/<str:username>/", views.get_user_data, name="user-account-get"),
 ]

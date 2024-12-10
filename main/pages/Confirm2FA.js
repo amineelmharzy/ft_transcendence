@@ -1,4 +1,5 @@
 import { redirect } from "../router/router.js"
+import appState from "../state/appState.js"
 
 function Confirm2FA() {
     const container = document.createElement("div")

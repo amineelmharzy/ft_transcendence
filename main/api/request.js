@@ -23,6 +23,7 @@ async function request({ uri, method = "POST", headers = {}, body }, auth_requir
         credentials: 'include',
         body: JSON.stringify(body)
     })
+
     const jsonResponse = response.headers.get('Content-Type')?.includes('application/json');
     if (!response.ok) {
         if (exclude.includes(response.status)) {

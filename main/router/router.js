@@ -9,37 +9,24 @@ import NotFound from "../pages/errors/NotFound.js";
 import Logout from '../pages/Logout.js';
 
 import { authMiddleware, authRedirectMiddleware } from '../middleware/auth.js';
-import Sidebar from '../component/main/Sidebar.js';
-import Header from '../component/main/Header.js';
 import appState from '../state/appState.js';
 import layoutState from '../state/layoutState.js';
 import { toggleNavigationComponents } from '../misc/toggleUtils.js';
 import Settings from '../pages/Settings.js';
+import { fetchUser } from '../services/userService.js';
 
 const pushState = window.history.pushState
 const pushStateEvent = new Event('pushstate')
 
-
-// const routes = {
-//     '/': authMiddleware(Chat),
-//     '/chat': authMiddleware(Chat),
-//     '/login': authRedirectMiddleware(Login),
-//     '/logout': Logout,
-//     '/register': authRedirectMiddleware(Register),
-//     '/profile': Profile,
-//     '/enable2fa': Enable2FA,
-//     '/confirm2fa': Confirm2FA,
-// };
-
 const routes = [
     { route: '/', handler: authMiddleware(Chat) },
-    { route: '/play', handler: Game },
+    { route: '/play', handler: authMiddleware(Game) },
     { route: '/chat', handler: authMiddleware(Chat) },
     { route: '/login', handler: authRedirectMiddleware(Login) },
     { route: '/logout', handler: Logout },
-    { route: '/profile', handler: Profile },
+    { route: '/profile', handler: authMiddleware(Profile) },
     { route: '/register', handler: authRedirectMiddleware(Register) },
-    { route: '/settings', handler: Settings },
+    { route: '/settings', handler: authMiddleware(Settings) },
     { route: '/enable2fa', handler: Enable2FA },
     { route: '/confirm2fa', handler: Confirm2FA },
 ];
@@ -69,13 +56,22 @@ export function Router() {
     const path = window.location.pathname;
     const route = routes.find(r => r.route == path)
     if (route && route.handler) {
-        if (!layoutState.commonLayout) {
-            // toggleNavigationComponents()
+        if (!layoutState.commonLayout && appState.isAuthenticated) {
+            toggleNavigationComponents()
         }
         return render(route.handler())
+    }
+    if (appState.isAuthenticated) {
+        fetchUser(path.substring(1)).then(data => {
+            if (data) {
+                toggleNavigationComponents()
+                return render(Profile(data))
+            }
+        })
     }
     return render(NotFound())
 }
 
 window.addEventListener('popstate', Router);
 window.addEventListener('pushstate', Router);
+

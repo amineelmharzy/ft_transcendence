@@ -7,7 +7,18 @@ import httpState from "../state/httpState.js"
 
 import Oauth from "./Oauth.js"
 import appState from "../state/appState.js"
+import { request } from "../api/request.js"
 
+function handleAuthRedirect() {
+    const url = window.location.href
+
+    const urlObj = new URL(url)
+    const token = urlObj.searchParams.get("token")
+    if (token) {
+        console.log(token)
+        // appState.update(null, token, null).then(data => console.log(data))
+    }
+}
 
 function handleLoginFailed(form) {
     if (httpState.status != "warning") {
@@ -26,6 +37,7 @@ function handleLoginFailed(form) {
 }
 
 function Login() {
+    handleAuthRedirect()
     const container = document.createElement('div')
     const oauthContainer = Oauth()
     container.classList.add("container-form-content", "text-center")
@@ -68,9 +80,10 @@ function Login() {
         const credentials = parseFromFields(form)
         login(credentials).then(() => {
             if (appState.user.otp_status) {
+                appState.isAuthenticated = false
                 redirect('confirm2fa')
             }
-            redirect('/')
+            else { redirect('/') }
         }).catch(error => {
             handleLoginFailed(form)
         })

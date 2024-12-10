@@ -1,3 +1,5 @@
+import { authLoginIntra } from "../services/authService.js"
+
 function Oauth() {
     const container = document.createElement('div')
     container.classList.add('container-oauth', 'mt-2', 'text-center')
@@ -18,7 +20,8 @@ function Oauth() {
 
     container.querySelector("#google-oauth-btn").addEventListener('click', () => {
     })
-    container.querySelector("#intra-oauth-btn").addEventListener('click', () => {
+    container.querySelector("#intra-oauth-btn").addEventListener('click', async () => {
+        await authLoginIntra();
     })
 
     return container

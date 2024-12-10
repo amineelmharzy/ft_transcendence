@@ -1,13 +1,20 @@
-function Profile() {
+import { formatYearDate } from "../misc/dateUtils.js";
+import { updateUser } from "../services/userService.js";
+import appState from "../state/appState.js";
+
+function Profile(userData = null) {
     const container = document.createElement("div")
+    if (!userData) {
+        userData = appState.user
+    }
     container.innerHTML = `
         <div class="main-content">
             <div class="profile">
                 <!-- Profile Background Image -->
                 <div>
                     <label class="background-container">
-                        <img src="../assets/images/background.avif" alt="" class="profile-cover">
-                        <input type="file" id="backgroundPicture" class="d-none" accept="image/*">
+                        <img src="${userData.background_url}" alt="" class="profile-cover">
+                        ${userData.id === appState.user.id ? `<input type="file" id="backgroundPicture" class="d-none" accept="image/*">` : ''}
                     </label>
                 </div>
 
@@ -15,21 +22,22 @@ function Profile() {
                 <div class="profile-wrapper">
                     <div class="profile-avatar">
                         <label class="profile-picture-wrapper">
-                            <img src="../assets/images/profile.jpg" alt="" class="profile-img">
-                            <input type="file" id="profilePicture" class="d-none" accept="image/*">
+                            <img src="${userData.photo_url}" alt="" class="profile-img">
+                            ${userData.id === appState.user.id ? `<input type="file" id="profilePicture" class="d-none" accept="image/*">` : ''}
                             <div class="online-status position-absolute"></div>
                         </label>
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between">
                         <!-- Profile Name -->
-                        <div class="profile-name">Quan Ha</div>
+                        <div class="profile-name">${userData.first_name ? `${userData.first_name} ${userData.last_name}` : userData.username}</div>
 
                         <!-- Add Friend and Send Message Buttons -->
-                        <div class="profile-actions text-center mt-2">
-                            <button class="btn btn-primary me-2">Add Friend</button>
-                            <button class="btn btn-dark">Send Message</button>
-                        </div>
+                        ${userData.id != appState.user.id ? `
+                            <div class="profile-actions text-center mt-2">
+                                <button class="btn btn-primary me-2">Add Friend</button>
+                                <button class="btn btn-dark">Send Message</button>
+                            </div>` : ''}
                     </div>
 
                     <!-- Profile Menu Links -->
@@ -52,21 +60,21 @@ function Profile() {
                                         <div class="info-item mb-3">
                                             <div class="info-content">
                                                 <h6 class="info-label mb-1">Full Name</h6>
-                                                <p class="info-value mb-0">John Doe</p>
+                                                <p class="info-value mb-0">${userData.first_name ? `${userData.first_name + ' ' + userData.last_name}` : userData.last_name ? userData.last_name : "No name provided."}</p>
                                             </div>
                                         </div>
                                         <!-- Username -->
                                         <div class="info-item mb-3">
                                             <div class="info-content">
                                                 <h6 class="info-label mb-1">Username</h6>
-                                                <p class="info-value mb-0">@johndoe</p>
+                                                <p class="info-value mb-0">@${userData.username}</p>
                                             </div>
                                         </div>
                                         <!-- Email -->
                                         <div class="info-item mb-3">
                                             <div class="info-content">
                                                 <h6 class="info-label mb-1">Email</h6>
-                                                <p class="info-value mb-0">johndoe@example.com</p>
+                                                <p class="info-value mb-0">${userData.email}</p>
                                             </div>
                                         </div>
                                         <!-- Biography -->
@@ -74,8 +82,16 @@ function Profile() {
                                             <div class="info-content">
                                                 <h6 class="info-label mb-1">Biography</h6>
                                                 <p class="info-value mb-0">
-                                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
-                                                    viverra justo in mi varius, vitae volutpat quam feugiat.
+                                                    ${userData.bio ? userData.bio : "No bio set yet."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <!-- Date Joined -->
+                                        <div class="info-item mb-3">
+                                            <div class="info-content">
+                                                <h6 class="info-label mb-1">Date Joined</h6>
+                                                <p class="info-value mb-0">
+                                                    ${formatYearDate(userData.date_joined)}
                                                 </p>
                                             </div>
                                         </div>
@@ -156,31 +172,6 @@ function Profile() {
         </div>
     `
 
-    // const menuToggler = container.querySelector(".menu-toggle")
-    // menuToggler.addEventListener('click', () => {
-    //     const sidebar = container.querySelector('.sidebar');
-    //     const mainContent = container.querySelector(".main-content")
-    //     const separator = container.querySelector('.sidebar-separator');
-    //     mainContent.addEventListener('click', (event) => {
-    //         if (!event.target.classList.contains('menu-toggle-icon')) {
-    //             sidebar.classList.remove('active')
-    //             menuToggler.classList.remove('hidden')
-    //             separator.style.left = '0'
-    //         }
-    //     })
-    //     sidebar.classList.toggle('active');
-    //     if (sidebar.classList.contains('active')) {
-    //         menuToggler.classList.add('hidden');
-    //         separator.style.left = '250px';
-
-    //     } else {
-    //         menuToggler.classList.remove('hidden');
-    //         separator.style.left = '0';
-    //     }
-
-    // })
-
-
     const ctx = container.querySelector('#stats-chart').getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'doughnut',
@@ -213,33 +204,54 @@ function Profile() {
         }
     });
 
-    const backgroundImage = container.querySelector('.profile-cover');
-    const backgroundPictureInput = container.querySelector('#backgroundPicture');
+    const backgroundContainer = container.querySelector('.background-container');
+    const profilePictureContainer = container.querySelector('.profile-picture-wrapper');
 
-    backgroundPictureInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                backgroundImage.src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    if (userData.id != appState.user.id) {
+        backgroundContainer.classList.add('no-hover');
+        profilePictureContainer.classList.add('no-hover')
+    }
 
-    const profileImage = container.querySelector('.profile-img');
-    const profilePictureInput = container.querySelector('#profilePicture');
+    if (userData.id === appState.user.id) {
+        const backgroundImage = container.querySelector('.profile-cover');
+        const backgroundPictureInput = container.querySelector('#backgroundPicture');
+        backgroundPictureInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const base64Image = reader.result.split(',')[1]; // Base64 without prefix
 
-    profilePictureInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                profileImage.src = reader.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+                    try {
+                        const response = await updateUser({ background_picture: base64Image });
+                        backgroundImage.src = response.background_url
+                    } catch (error) {
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        const profilePicture = container.querySelector('.profile-img');
+        const profilePictureInput = container.querySelector('#profilePicture');
+
+        profilePictureInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    const base64Image = reader.result.split(',')[1]; // Base64 without prefix
+
+                    try {
+                        const response = await updateUser({ profile_picture: base64Image });
+                        profilePicture.src = response.photo_url
+                    } catch (error) {
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
     return container
 }
 

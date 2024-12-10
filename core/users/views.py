@@ -14,6 +14,8 @@ from .serializers import (
     UserAccountSerializer,
 )
 
+from django.contrib.auth import login as jwt_login
+
 from django.conf import settings
 from .models import User
 from .misc import get_tokens_for_user
@@ -44,6 +46,7 @@ def login(request):
 
         user = authenticate(username=username, password=password)
         if user:
+            jwt_login(request=request, user=user)
             token = get_tokens_for_user(user)
             response = Response(
                 {"access_token": token["access"]},
@@ -220,7 +223,12 @@ def update_user(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_user_data(request):
-    user = request.user
-    serialized = UserAccountSerializer(user)
+def get_user_data(request, username=None):
+    if username:
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    else:
+        user = request.user
+    serialized = UserAccountSerializer(user, context={"request": request})
     return Response(serialized.data, status=status.HTTP_200_OK)

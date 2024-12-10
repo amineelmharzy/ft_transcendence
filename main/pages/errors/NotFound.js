@@ -5,7 +5,7 @@ import layoutState from "../../state/layoutState.js"
 
 function NotFound() {
     const container = document.createElement('div')
-    container.className = 'container-error'
+    container.className = 'container-error pt-5'
     container.innerHTML = `
         <a href="/" id="logo-error">Home</a>
         <p><b>404.</b> <ins>That’s an error.</ins>

@@ -112,8 +112,8 @@ class Engine {
         this.paddleWidth = 4
         this.paddleHeight = 50
         this.ballRadius = 4
-        this.paddleSpeed = 1
-        this.ballSpeed = 1
+        this.paddleSpeed = 3
+        this.ballSpeed = 3
 
         // this.oppening = false
         // this.remote = false
@@ -292,6 +292,8 @@ class GameSession extends Engine {
     bindEvents() {
         this.playerPaddle = this.opening ? this.leftPaddle : this.rightPaddle
         this.opponentPaddle = this.opening ? this.rightPaddle : this.leftPaddle
+        this.leftText.innerText = this.opening ? this.player.username : this.opponent.username
+        this.rightText.innerText = this.opening ? this.opponent.username : this.player.username
 
         document.addEventListener('keydown', (event) => {
             this.isPlayerMoving = true
@@ -359,7 +361,7 @@ class GameSession extends Engine {
         if (this.ball.x <= 0) {
             if (this.opening) {
                 this.playerPaddle.score++
-                // this.socket.send(JSON.stringify({ 'player': this.player.id, 'event': 'point' }))
+                this.socket.send(JSON.stringify({ 'player': this.player.id, 'event': 'point' }))
             } else {
                 this.opponentPaddle.score++
             }
@@ -370,7 +372,7 @@ class GameSession extends Engine {
         if (this.ball.x >= this.canvas.width) {
             if (this.opening) {
                 this.opponentPaddle.score++
-                // this.socket.send(JSON.stringify({ 'player': this.player.id, 'event': 'point' }))
+                this.socket.send(JSON.stringify({ 'player': this.player.id, 'event': 'point' }))
             } else {
                 this.playerPaddle.score++
             }
@@ -391,15 +393,15 @@ class GameSession extends Engine {
         }
 
         this.socket.onmessage = (e) => {
-            const data = JSON.parse(e.data)
             let event
             let player
+            const data = JSON.parse(e.data)
 
             this.container.querySelector(".waiting-message").style.display = 'none'
             if (!this.continue) {
 
-                this.opponent = data.opponent
-                this.opening = this.opponent.id != this.player.id
+                this.opponent = data.opponent.id != this.player.id ? data.opponent : data.player
+                this.opening = data.opening != this.player.id
                 this.continue = true
                 this.start()
             } else {
@@ -407,9 +409,6 @@ class GameSession extends Engine {
                 player = data.player
                 if (player != this.player.id) {
                     if (event == 'move') {
-                        if (player.id != this.player.id) {
-                            console.log("bounceY => ", data.y)
-                        }
                         this.opponentPaddle.y = data.y
                     }
                 }
@@ -432,9 +431,7 @@ class GameSession extends Engine {
         if (this.continue) {
             this.clear()
             this.detectCollision()
-            // if (this.isPlayerMoving) {
             this.updatePaddle()
-            // }
             this.ball.update()
             this.draw()
         }
@@ -453,7 +450,7 @@ class GameManager {
             this.newGame.style.display = 'none'
             this.waitingMessage.style.display = 'flex'
             this.game = new GameSession(container)
-            this.start()
+            // this.start()
         })
     }
 
@@ -464,7 +461,7 @@ class GameManager {
 
 function Game() {
     const container = document.createElement('div')
-    container.classList.add('game-container')
+    container.classList.add('main-content', 'game-container')
     container.innerHTML = `
         <div class="game-area">
             <div class="game-new">

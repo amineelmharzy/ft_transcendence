@@ -104,10 +104,13 @@ class Sidebar extends HTMLElement {
             <div class="sidebar-separator"></div>
         `
 
-        this.sidebar.querySelectorAll('.nav-link').forEach((link) => {
+        const links = this.sidebar.querySelectorAll('.nav-link')
+        links.forEach((link) => {
             link.onclick = (e) => {
                 redirect(link.pathname)
                 e.preventDefault()
+                links.forEach(l => l.classList.remove('active-link'))
+                link.classList.add('active-link');
             }
         })
     }

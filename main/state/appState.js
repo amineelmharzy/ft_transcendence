@@ -22,7 +22,7 @@ class AppState {
         this.isAuthenticated = isAuthenticated
 
         if (!this.user) {
-            this.user = this.user ?? await getUser()
+            this.user = await getUser()
             this.isAuthenticated = true
         }
         this.save()

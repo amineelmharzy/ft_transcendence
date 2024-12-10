@@ -24,19 +24,25 @@ class UserManger(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    first_name = models.CharField("first name", max_length=20)
-    last_name = models.CharField("last name", max_length=20)
+    first_name = models.CharField("first name", max_length=20, blank=True)
+    last_name = models.CharField("last name", max_length=20, blank=True)
     username = models.CharField("username", max_length=20, unique=True, db_index=True)
     email = models.EmailField(
         "email address", max_length=128, unique=True, db_index=True
     )
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField("created at", auto_now_add=True)
+
     last_login = models.DateTimeField("last login", auto_now_add=True)
+    date_joined = models.DateTimeField("created at", auto_now_add=True)
+
+    bio = models.CharField("bio", max_length=255, blank=True)
+
     otp_secret = models.CharField(max_length=32)
     otp_status = models.BooleanField(default=False)
 
+    profile_picture = models.ImageField(upload_to="profile_pictures/", default="profile.jpg")
+    background_picture = models.ImageField(upload_to="profile_pictures/", default="background.avif")
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
 

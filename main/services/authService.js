@@ -32,7 +32,7 @@ function logout() {
 }
 
 async function refreshToken() {
-    await request({ uri: 'refresh_token', method: 'GET' })
+    await request({ uri: 'token/refresh', method: 'GET' })
         .then(async () => {
             await appState.update(null, httpState.response.access_token)
             return true
@@ -42,7 +42,7 @@ async function refreshToken() {
 }
 
 async function enableOTP() {
-    await request({ uri: 'enable_otp', method: 'GET' }, true)
+    await request({ uri: 'otp/enable', method: 'GET' }, true)
         .then(() => {
             return false
         })
@@ -52,7 +52,7 @@ async function enableOTP() {
 }
 
 async function disableOTP() {
-    await request({ uri: "disable_otp", method: "GET" }, true)
+    await request({ uri: "otp/disable", method: "GET" }, true)
         .then(() => {
             return true
         }).catch(error => {
@@ -61,7 +61,7 @@ async function disableOTP() {
 }
 
 async function confirmOTP(otp) {
-    await request({ uri: 'confirm_otp', body: { 'otp': otp } }, true)
+    await request({ uri: 'otp/confirm', body: { 'otp': otp } }, true)
         .then(() => {
             return true
         }).catch(error => {
@@ -69,6 +69,12 @@ async function confirmOTP(otp) {
         })
 }
 
+async function authLoginIntra() {
+    await request({ uri: "oauth/intra", method: "GET" }, false);
+    window.location.href = httpState.response.oauth_url
+}
+
 export { login, register, logout }
+export { authLoginIntra }
 export { enableOTP, disableOTP, confirmOTP }
 export { refreshToken }
